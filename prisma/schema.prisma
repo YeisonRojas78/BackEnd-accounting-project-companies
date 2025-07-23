@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model PagosBancos {
+  id                 Int      @id @default(autoincrement())
+  NombreBeneficiario String
+  NumeroCuenta       String
+  MontoTotal         Float
+  ReferenciaPago     String
+  tipoCuenta         TipoCuenta @relation(fields: [tipoCuentaId], references: [id])
+  tipoCuentaId       Int
+  banco              Bancos     @relation(fields: [bancoId], references: [id])
+  bancoId            Int
+  metodoPago         MetodoPago @relation(fields: [metodoPagoId], references: [id])
+  metodoPagoId       Int
+  usuario            Usuario    @relation(fields: [usuarioId], references: [id])
+  usuarioId          Int
+}
+
+model PagosDian {
+  id               Int      @id @default(autoincrement())
+  NumeroReferencia String
+  MontoTotal       Float
+  FechaPago        DateTime
+  ComprobantePago  String
+  tipoImpuesto     TipoImpuesto @relation(fields: [tipoImpuestoId], references: [id])
+  tipoImpuestoId   Int
+  metodoPago       MetodoPago   @relation(fields: [metodoPagoId], references: [id])
+  metodoPagoId     Int
+  usuario          Usuario      @relation(fields: [usuarioId], references: [id])
+  usuarioId        Int
+}
+
+model TipoCuenta {
+  id          Int           @id @default(autoincrement())
+  TipoCuenta  String
+  pagosBancos PagosBancos[]
+}
+
+model TipoImpuesto {
+  id           Int          @id @default(autoincrement())
+  TipoImpuesto String
+  pagosDian    PagosDian[]
+}
+
+model Bancos {
+  id          Int           @id @default(autoincrement())
+  NombreBanco String
+  pagosBancos PagosBancos[]
+}
+
+model MetodoPago {
+  id          Int           @id @default(autoincrement())
+  MetodoPago  String
+  pagosBancos PagosBancos[]
+  pagosDian   PagosDian[]
+}
+
+model Rol {
+  id     Int      @id @default(autoincrement())
+  nombre String
+  usuarios Usuario[]
+}
+
+model Usuario {
+  id       Int      @id @default(autoincrement())
+  nombre   String
+  correo   String   @unique
+  clave    String
+  rol      Rol      @relation(fields: [rolId], references: [id])
+  rolId    Int
+  pagosBancos PagosBancos[]
+  pagosDian   PagosDian[]
+}
