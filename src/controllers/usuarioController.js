@@ -12,17 +12,15 @@ export const getUsuarios = async (req, res) => {
 };
 
 export const createUsuario = async (req, res) => {
-  const { nombre, usuario, contraseña, correo, estado, fk_rol } = req.body;
+  const { nombre, correo, clave, rolId } = req.body;
 
   try {
     const nuevoUsuario = await prisma.usuario.create({
       data: {
         nombre,
-        usuario,
-        contraseña,
         correo,
-        estado,
-        fk_rol,
+        clave,
+        rolId,
       },
     });
     res.status(201).json(nuevoUsuario);
@@ -50,11 +48,20 @@ export const deleteUsuario = async (req, res) => {
   const { id } = req.params;
 
   try {
+    const userId = parseInt(id);
+
+    // Eliminar pagos relacionados primero
+    await prisma.pagosBancos.deleteMany({ where: { usuarioId: userId } });
+    await prisma.pagosDian.deleteMany({ where: { usuarioId: userId } });
+
+    // Eliminar el usuario
     await prisma.usuario.delete({
-      where: { id: parseInt(id) },
+      where: { id: userId },
     });
+
     res.json({ mensaje: 'Usuario eliminado correctamente' });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Error al eliminar usuario' });
   }
 };

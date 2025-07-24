@@ -1,13 +1,13 @@
 import prisma from '../prismaClient.js';
 
+// Obtener todos los pagos a bancos
 export const obtenerPagosBancos = async (req, res) => {
   try {
     const pagos = await prisma.pagosBancos.findMany({
       include: {
-        tipoCuenta: true,
-        banco: true,
-        metodoPago: true,
-        usuario: true,
+        usuario: {
+          select: { id: true, nombre: true, correo: true }
+        }
       }
     });
     res.json(pagos);
@@ -17,16 +17,18 @@ export const obtenerPagosBancos = async (req, res) => {
   }
 };
 
+// Crear un nuevo pago a banco
 export const crearPagoBanco = async (req, res) => {
+  console.log("REQ BODY:", req.body); // 👈 Agrega esto
   const {
     NombreBeneficiario,
     NumeroCuenta,
     MontoTotal,
     ReferenciaPago,
-    TipoCuenta_id,
-    Bancos_id,
-    MetodoPago_id,
-    Usuario_id
+    tipoCuenta,
+    banco,
+    metodoPago,
+    usuarioId
   } = req.body;
 
   try {
@@ -36,10 +38,10 @@ export const crearPagoBanco = async (req, res) => {
         NumeroCuenta,
         MontoTotal,
         ReferenciaPago,
-        tipoCuenta: { connect: { id: TipoCuenta_id } },
-        banco: { connect: { id: Bancos_id } },
-        metodoPago: { connect: { id: MetodoPago_id } },
-        usuario: { connect: { id: Usuario_id } },
+        tipoCuenta,
+        banco,
+        metodoPago,
+        usuario: { connect: { id: usuarioId } }
       }
     });
     res.status(201).json(nuevoPago);
@@ -49,26 +51,32 @@ export const crearPagoBanco = async (req, res) => {
   }
 };
 
-export const eliminarPagoBanco = async (req, res) => {
-  const { id } = req.params;
 
-  try {
-    await prisma.pagosBancos.delete({ where: { id: parseInt(id) } });
-    res.json({ message: 'Pago eliminado correctamente' });
-  } catch (error) {
-    console.error('Error al eliminar el pago:', error);
-    res.status(500).json({ error: 'Error al eliminar el pago de banco' });
-  }
-};
-
+// Actualizar un pago
 export const actualizarPagoBanco = async (req, res) => {
   const { id } = req.params;
-  const data = req.body;
+  const {
+    NombreBeneficiario,
+    NumeroCuenta,
+    MontoTotal,
+    ReferenciaPago,
+    tipoCuenta,
+    banco,
+    metodoPago
+  } = req.body;
 
   try {
     const pagoActualizado = await prisma.pagosBancos.update({
       where: { id: parseInt(id) },
-      data
+      data: {
+        NombreBeneficiario,
+        NumeroCuenta,
+        MontoTotal,
+        ReferenciaPago,
+        tipoCuenta,
+        banco,
+        metodoPago
+      }
     });
     res.json(pagoActualizado);
   } catch (error) {

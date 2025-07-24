@@ -5,34 +5,46 @@ export const getPagosDian = async (req, res) => {
   try {
     const pagos = await prisma.pagosDian.findMany({
       include: {
-        tipoImpuesto: true,
-        metodoPago: true,
-        usuario: true
+        usuario: {
+          select: { id: true, nombre: true, correo: true }
+        }
       }
     });
     res.json(pagos);
   } catch (error) {
+    console.error('Error al obtener los pagos a DIAN:', error);
     res.status(500).json({ error: 'Error al obtener los pagos a DIAN' });
   }
 };
 
 // Crear un nuevo pago DIAN
 export const createPagoDian = async (req, res) => {
-  const { numeroReferencia, montoTotal, fechaPago, comprobantePago, tipoImpuestoId, metodoPagoId, usuarioId } = req.body;
+  console.log("REQ.BODY RECIBIDO:", req.body);
+  const {
+    tipoImpuesto,
+    referencia,
+    valor,
+    fecha,
+    metodo,
+    comprobante,
+    usuarioId
+  } = req.body;
+
   try {
     const nuevoPago = await prisma.pagosDian.create({
       data: {
-        numeroReferencia,
-        montoTotal: parseFloat(montoTotal),
-        fechaPago: new Date(fechaPago),
-        comprobantePago,
-        tipoImpuestoId,
-        metodoPagoId,
+        tipoImpuesto,
+        NumeroReferencia: referencia,
+        MontoTotal: parseFloat(valor),
+        FechaPago: new Date(fecha),
+        metodoPago: metodo,
+        ComprobantePago: comprobante,
         usuarioId
       }
     });
-    res.json(nuevoPago);
+    res.status(201).json(nuevoPago);
   } catch (error) {
+    console.error('Error al crear el pago a DIAN:', error);
     res.status(500).json({ error: 'Error al crear el pago a DIAN' });
   }
 };
@@ -40,22 +52,32 @@ export const createPagoDian = async (req, res) => {
 // Actualizar pago DIAN
 export const updatePagoDian = async (req, res) => {
   const { id } = req.params;
-  const { numeroReferencia, montoTotal, fechaPago, comprobantePago, tipoImpuestoId, metodoPagoId, usuarioId } = req.body;
+  const {
+    tipoImpuesto,
+    referencia,
+    valor,
+    fecha,
+    metodo,
+    comprobante,
+    usuarioId
+  } = req.body;
+
   try {
     const pagoActualizado = await prisma.pagosDian.update({
       where: { id: parseInt(id) },
       data: {
-        numeroReferencia,
-        montoTotal: parseFloat(montoTotal),
-        fechaPago: new Date(fechaPago),
-        comprobantePago,
-        tipoImpuestoId,
-        metodoPagoId,
+        tipoImpuesto,
+        NumeroReferencia: referencia,
+        MontoTotal: parseFloat(valor),
+        FechaPago: new Date(fecha),
+        metodoPago: metodo,
+        ComprobantePago: comprobante,
         usuarioId
       }
     });
     res.json(pagoActualizado);
   } catch (error) {
+    console.error('Error al actualizar el pago a DIAN:', error);
     res.status(500).json({ error: 'Error al actualizar el pago a DIAN' });
   }
 };
@@ -63,13 +85,14 @@ export const updatePagoDian = async (req, res) => {
 // Eliminar pago DIAN
 export const deletePagoDian = async (req, res) => {
   const { id } = req.params;
+
   try {
     await prisma.pagosDian.delete({
       where: { id: parseInt(id) }
     });
     res.json({ message: 'Pago a DIAN eliminado correctamente' });
   } catch (error) {
+    console.error('Error al eliminar el pago a DIAN:', error);
     res.status(500).json({ error: 'Error al eliminar el pago a DIAN' });
   }
 };
-

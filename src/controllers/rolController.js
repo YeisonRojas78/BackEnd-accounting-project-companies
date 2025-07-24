@@ -10,11 +10,11 @@ export const getRoles = async (req, res) => {
 };
 
 export const createRol = async (req, res) => {
-  const { nombreRol } = req.body;
+  const { nombre } = req.body;
 
   try {
     const nuevoRol = await prisma.rol.create({
-      data: { nombreRol },
+      data: { nombre },
     });
     res.status(201).json(nuevoRol);
   } catch (error) {
@@ -24,12 +24,12 @@ export const createRol = async (req, res) => {
 
 export const updateRol = async (req, res) => {
   const { id } = req.params;
-  const { nombreRol } = req.body;
+  const { nombre } = req.body;
 
   try {
     const rolActualizado = await prisma.rol.update({
       where: { id: parseInt(id) },
-      data: { nombreRol },
+      data: { nombre },
     });
     res.json(rolActualizado);
   } catch (error) {
