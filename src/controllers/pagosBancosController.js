@@ -84,3 +84,17 @@ export const actualizarPagoBanco = async (req, res) => {
     res.status(500).json({ error: 'Error al actualizar el pago de banco' });
   }
 };
+// Eliminar pago banco
+export const deletePagoBancos = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await prisma.pagosBancos.delete({
+      where: { id: parseInt(id) }
+    });
+    res.json({ message: 'Pago a Banco eliminado correctamente' });
+  } catch (error) {
+    console.error('Error al eliminar el pago a Banco:', error);
+    res.status(500).json({ error: 'Error al eliminar el pago a Banco' });
+  }
+};
