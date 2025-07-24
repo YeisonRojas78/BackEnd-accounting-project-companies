@@ -1,5 +1,5 @@
 import prisma from '../prismaClient.js';
-
+//jadla
 export const getUsuarios = async (req, res) => {
   try {
     const usuarios = await prisma.usuario.findMany({
